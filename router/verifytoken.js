@@ -4,12 +4,12 @@ const CommonError = require("../error_module/CommonError");
 // Verify jwt token middleware
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers.token;
-    if(authHeader){
+    if (authHeader) {
         const token = authHeader.split(" ")[1];
         jwt.verify(token, process.env.JWT_SEC, (err, user) => {
-            if(err){
+            if (err) {
                 next(new CommonError(err.message, 403));
-            }else {
+            } else {
                 req.user = user;
                 next();
             }
@@ -20,8 +20,8 @@ const verifyToken = (req, res, next) => {
 }
 
 const verifyTokenAndAuth = (req, res, next) => {
-    verifyToken(req,res, ()=> {
-        if(req.user.id === req.params.id || req.user.isAdmin) {
+    verifyToken(req, res, () => {
+        if (req.user.id === req.params.id || req.user.isAdmin) {
             next();
         } else {
             next(new CommonError("You are not authorized to update", 403))
@@ -29,4 +29,14 @@ const verifyTokenAndAuth = (req, res, next) => {
     })
 }
 
-module.exports = { verifyToken, verifyTokenAndAuth };
+const verifyTokenAndAdmin = (req, res, next) => {
+    verifyToken(req, res, () => {
+        if (req.user.isAdmin) {
+            next();
+        } else {
+            next(new CommonError("You are not authorized to update", 403))
+        }
+    })
+}
+
+module.exports = { verifyToken, verifyTokenAndAuth, verifyTokenAndAdmin };
